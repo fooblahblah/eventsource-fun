@@ -14,23 +14,25 @@ class ConversionTracker extends EventsourcedProcessor with ActorLogging {
   }
 
   def receiveCommand = {
+    case GetState =>
+      sender ! state
+
     case Hit =>
-      log.info(s"Got a Hit")
       persist(calculateCTR(state.copy(hits = state.hits + 1))) { stats =>
         // update our internal state
         state = stats
         // Do some real work here ...
-        log.info(s"Current CTR = ${stats.conversionRate}")
       }
 
     case Conversion =>
-      log.info(s"Got a Conversion")
       persist(calculateCTR(state.copy(conversions = state.conversions + 1))) { stats =>
         // update our internal state
         state = stats
         // Do some real work here ...
-        log.info(s"Current CTR = ${stats.conversionRate}")
       }
+
+    case ThrowUp =>
+      throw new Exception("I'm throwing up now")
   }
 
   def calculateCTR(stats: SiteStatistics): SiteStatistics = {
@@ -43,7 +45,9 @@ class ConversionTracker extends EventsourcedProcessor with ActorLogging {
   }
 }
 
-case object Hit
 case object Conversion
+case object GetState
+case object Hit
+case object ThrowUp // use for testing restart
 
 case class SiteStatistics(hits: Long = 0, conversions: Long = 0, conversionRate: Double = 0.0)

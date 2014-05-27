@@ -1,6 +1,6 @@
 package org.fooblahblah.conversion
 
-import akka.actor.{PoisonPill, Props, ActorSystem}
+import akka.actor.{Props, ActorSystem}
 
 object SiteMain extends App {
   val system     = ActorSystem()
